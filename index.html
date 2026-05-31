@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Export Button Is No Longer the Handoff</title>
+<meta name="description" content="Sharing used to mean freezing your work into a file. Web runtimes let some work travel as a live system. Motion graphics generated live from one HTML source, with the new question: which outputs stay live and which get frozen.">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="The Export Button Is No Longer the Handoff">
+<meta property="og:description" content="Sharing used to mean freezing your work into a file. Web runtimes let some work travel as a live system instead. The new question: which outputs stay live, and which must be frozen as an approved record?">
+<meta property="og:image" content="https://mustbesimo.github.io/export-not-the-handoff/og-preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Export Button Is No Longer the Handoff">
+<meta name="twitter:description" content="Sharing used to mean freezing your work into a file. Now some work can travel as a live system. The new question is which outputs stay live and which get frozen.">
+<meta name="twitter:image" content="https://mustbesimo.github.io/export-not-the-handoff/og-preview.png">
+
+<style>
+  :root{
+    --bg1:#f4f9ff; --bg2:#e7f1fe; --bg3:#dbeafe;
+    --surface:#ffffff; --surface2:#f3f8ff;
+    --line:#cfe1f6; --line2:#bcd6f2;
+    --ink:#0f2744; --mid:#3a5a82; --muted:#6b86a8; --faint:#9fb4cf;
+    --blue:#378add; --blue-d:#185fa5; --sky:#7cc0f5; --cyan:#5dcaef;
+    --grad:linear-gradient(135deg,#7cc0f5 0%,#5b9fe6 45%,#6f8ff0 100%);
+    --grad-soft:linear-gradient(160deg,#f4f9ff 0%,#e3f0fe 55%,#d6e8fd 100%);
+    --mono:'SFMono-Regular',ui-monospace,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--grad-soft);background-attachment:fixed;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.6}
+  .wrap{max-width:1080px;margin:0 auto;padding:56px 24px 96px}
+  .hero{position:relative;border-radius:28px;overflow:hidden;padding:56px 44px;background:var(--grad);color:#fff;box-shadow:0 24px 60px -28px rgba(43,108,176,.55)}
+  .hero::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 140% at 85% -10%,rgba(255,255,255,.45),transparent 55%);pointer-events:none}
+  .kicker{position:relative;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.85);margin-bottom:18px}
+  h1{position:relative;font-size:clamp(32px,5.4vw,58px);line-height:1.03;font-weight:600;letter-spacing:-.02em;max-width:17ch}
+  .sub{position:relative;color:rgba(255,255,255,.92);font-size:18px;max-width:60ch;margin-top:24px}
+  .sub b{color:#fff;font-weight:600}
+  .studio{margin-top:40px;border:1px solid var(--line);border-radius:20px;background:var(--surface);overflow:hidden;box-shadow:0 18px 48px -30px rgba(43,108,176,.45)}
+  .studio-head{display:flex;align-items:center;gap:10px;padding:15px 20px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--surface2)}
+  .dot{width:11px;height:11px;border-radius:50%}
+  .stage-grid{display:grid;grid-template-columns:1fr 304px}
+  @media(max-width:780px){.stage-grid{grid-template-columns:1fr}}
+  .stage{position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,#0d2748,#10325c);overflow:hidden}
+  canvas{display:block;width:100%;height:100%}
+  .controls{padding:24px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:20px;background:var(--surface)}
+  @media(max-width:780px){.controls{border-left:none;border-top:1px solid var(--line)}}
+  .ctrl label{display:block;font-size:11px;color:var(--muted);margin-bottom:8px;font-family:var(--mono);letter-spacing:.07em;text-transform:uppercase}
+  .ctrl input[type=text]{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:10px 12px;font-family:var(--sans);font-size:15px;outline:none}
+  .ctrl input[type=text]:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(55,138,221,.18)}
+  .ctrl input[type=range]{width:100%;accent-color:var(--blue)}
+  .swatches{display:flex;gap:9px}
+  .sw{width:32px;height:32px;border-radius:9px;cursor:pointer;border:2px solid transparent;transition:transform .12s}
+  .sw:hover{transform:scale(1.08)}
+  .sw.on{border-color:var(--blue-d);box-shadow:0 0 0 3px rgba(55,138,221,.2)}
+  .row{display:flex;gap:8px}
+  .seg{flex:1;text-align:center;padding:9px 4px;border:1px solid var(--line);border-radius:10px;font-size:13px;cursor:pointer;color:var(--mid);user-select:none;transition:all .12s}
+  .seg:hover{border-color:var(--line2)}
+  .seg.on{background:var(--grad);color:#fff;border-color:transparent}
+  .live{margin-left:auto;display:flex;align-items:center;gap:7px;color:var(--blue-d);font-family:var(--mono);font-size:11px}
+  .pulse{width:8px;height:8px;border-radius:50%;background:#27c93f;animation:pulse 1.4s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+  .render-bar{padding:18px 20px;border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--surface2)}
+  button.act{background:var(--grad);color:#fff;border:none;border-radius:11px;padding:12px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);box-shadow:0 8px 20px -10px rgba(43,108,176,.7)}
+  button.act.ghost{background:#fff;color:var(--blue-d);border:1px solid var(--line2);box-shadow:none}
+  button.act:active{transform:scale(.98)}
+  .render-meta{font-family:var(--mono);font-size:12px;color:var(--muted);display:flex;gap:18px;flex-wrap:wrap}
+  .render-meta b{color:var(--blue-d);font-weight:600}
+  .frames{margin-top:20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:9px}
+  .frame{aspect-ratio:16/9;border-radius:9px;overflow:hidden;border:1px solid var(--line);position:relative;background:#0d2748;box-shadow:0 6px 16px -12px rgba(43,108,176,.5)}
+  .frame canvas{position:absolute;inset:0}
+  .frame span{position:absolute;left:5px;bottom:4px;font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.7)}
+  .note{margin-top:16px;font-size:13px;color:var(--mid);font-family:var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .thesis{margin-top:72px}
+  .thesis-h{font-size:13px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em;color:var(--blue-d);margin-bottom:20px;text-align:center}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}}
+  .cell{background:var(--surface);padding:26px;border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 34px -28px rgba(43,108,176,.4)}
+  .cell h3{font-size:12px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--blue);margin-bottom:14px}
+  .cell .old{color:var(--faint);text-decoration:line-through;font-size:15px;margin-bottom:7px}
+  .cell .new{color:var(--ink);font-size:17px;font-weight:600}
+  .cell .src{margin-top:14px;font-size:12px;color:var(--muted);font-family:var(--mono);border-top:1px solid var(--line);padding-top:12px}
+  .demo{margin-top:16px}
+  .demo-screen{border-radius:11px;overflow:hidden;border:1px solid var(--line2);background:linear-gradient(135deg,#0d2748,#123a6b)}
+  .demo-screen canvas{display:block;width:100%;height:auto}
+  .demo-ctl{display:flex;align-items:center;gap:9px;margin-top:10px;flex-wrap:wrap}
+  .demo-tag{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .mini{background:#fff;border:1px solid var(--line2);color:var(--blue-d);border-radius:8px;padding:6px 11px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .mini:hover{border-color:var(--blue)}
+  .mini:active{transform:scale(.97)}
+  .mini.on{background:var(--grad);color:#fff;border-color:transparent}
+  .slide-bar{background:rgba(255,255,255,.12);padding:7px 11px}
+  .urlbar{font-family:var(--mono);font-size:11px;color:#bcd6f2}
+  .urlbar b{color:#fff}
+  .slide-body{height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:12px}
+  .slide-body .sn{font-size:26px;font-weight:600;letter-spacing:-.01em}
+  .slide-body .sd{font-size:12px;color:#bcd6f2;margin-top:6px;font-family:var(--mono)}
+  .agent-out{height:96px;display:flex;align-items:center;justify-content:center;transition:background .25s}
+  .close{margin-top:64px;font-size:21px;line-height:1.62;max-width:60ch;margin-left:auto;margin-right:auto;text-align:center;color:var(--mid)}
+  .close b{color:var(--ink);font-weight:600}
+  .cta{margin-top:40px;text-align:center}
+  .cta button{font-size:15px;padding:14px 26px}
+  footer{margin-top:64px;padding-top:26px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--muted);text-align:center}
+  footer a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+  footer a:hover{color:var(--blue)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="kicker">A sequel to "HTML is the new After Effects"</div>
+    <h1>The export button is no longer the handoff.</h1>
+    <p class="sub">Sharing your work used to mean freezing it into a file. Web runtimes and source-driven deployment now let some work travel as a live system instead of a frozen deliverable. <b>The motion below is generated live from this HTML source</b>; edit it, copy the link, and what you share is a live state, not a media file someone exported.</p>
+  </div>
+
+  <div class="studio">
+    <div class="studio-head">
+      <span class="dot" style="background:#ff5f56"></span>
+      <span class="dot" style="background:#ffbd2e"></span>
+      <span class="dot" style="background:#27c93f"></span>
+      <span style="margin-left:8px">kinetic-poster.html · running live in your browser</span>
+      <span class="live"><span class="pulse"></span>LIVE</span>
+    </div>
+    <div class="stage-grid">
+      <div class="stage"><canvas id="stage" width="1280" height="720"></canvas></div>
+      <div class="controls">
+        <div class="ctrl">
+          <label>Headline</label>
+          <input id="txt" type="text" value="Deploy, don't export" maxlength="28">
+        </div>
+        <div class="ctrl">
+          <label>Energy</label>
+          <input id="energy" type="range" min="0" max="100" value="62">
+        </div>
+        <div class="ctrl">
+          <label>Palette</label>
+          <div class="swatches" id="pal"></div>
+        </div>
+        <div class="ctrl">
+          <label>Motion</label>
+          <div class="row" id="mode">
+            <div class="seg on" data-m="orbit">Orbit</div>
+            <div class="seg" data-m="wave">Wave</div>
+            <div class="seg" data-m="burst">Burst</div>
+          </div>
+        </div>
+        <div class="ctrl" style="margin-top:auto">
+          <label>Why this matters</label>
+          <div style="font-size:13px;color:var(--mid);line-height:1.5">Change anything, then copy the link: it carries your edits in the URL, so what you share is a live state, not a frozen render. A media export would still need a render.</div>
+        </div>
+      </div>
+    </div>
+    <div class="render-bar">
+      <button class="act" id="renderBtn">Render 16 frames →</button>
+      <button class="act ghost" id="copyBtn">Copy the live URL</button>
+      <div class="render-meta">
+        <span>engine: <b>Canvas + requestAnimationFrame</b></span>
+        <span>repeatable: <b id="detstate">same inputs + timestamp → same frame</b></span>
+        <span id="rendertime"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="frames" id="frames"></div>
+  <div class="note" id="frameNote" style="display:none"></div>
+
+  <div class="thesis">
+    <div class="thesis-h">The same pattern across several web-native workflows</div>
+    <div style="text-align:center;font-size:13px;color:var(--muted);max-width:60ch;margin:0 auto 24px;font-family:var(--mono)">These four cards are interactive sketches that illustrate the workflow shift. They are not the actual products running, just small in-browser illustrations of the pattern.</div>
+    <div class="grid">
+      <div class="cell">
+        <h3>Presentations</h3>
+        <div class="old">PowerPoint → Save As → email the .pptx</div>
+        <div class="new">Slidev builds a web app → deploy → the deck is a live web artifact</div>
+        <div class="demo">
+          <div class="demo-screen" id="slideScreen">
+            <div class="slide-bar"><span class="urlbar" id="slideUrl">…/deck<b>#1</b></span></div>
+            <div class="slide-body" id="slideBody"></div>
+          </div>
+          <div class="demo-ctl">
+            <button class="mini" id="slidePrev">‹</button>
+            <button class="mini" id="slideNext">slide ›</button>
+            <span class="demo-tag">illustrative sketch · the URL locates the deployed deck</span>
+          </div>
+        </div>
+        <div class="src">Slidev's PPTX export captures slides as images, removing runtime interactivity. The project is the source; the URL is the deployed artifact.</div>
+      </div>
+      <div class="cell">
+        <h3>Video</h3>
+        <div class="old">After Effects → render queue → rerender for small changes</div>
+        <div class="new">HyperFrames: write HTML → MP4 via a repeatable render pipeline</div>
+        <div class="demo">
+          <div class="demo-screen"><canvas id="vidCanvas" width="600" height="200"></canvas></div>
+          <div class="demo-ctl">
+            <input type="range" id="vidScrub" min="0" max="100" value="30" style="flex:1">
+            <span class="demo-tag" id="vidTag">illustrative scrubber · frame 9 from source</span>
+          </div>
+        </div>
+        <div class="src">HeyGen's HyperFrames is open source under Apache 2.0: "write HTML, render video, built for agents."</div>
+      </div>
+      <div class="cell">
+        <h3>Animation</h3>
+        <div class="old">AE → export baked Lottie JSON → update source → re-export</div>
+        <div class="new">Rive state machines + data binding move some behavior into runtime</div>
+        <div class="demo">
+          <div class="demo-screen"><canvas id="smCanvas" width="600" height="200"></canvas></div>
+          <div class="demo-ctl">
+            <button class="mini sm-st on" data-s="idle">idle</button>
+            <button class="mini sm-st" data-s="hover">hover</button>
+            <button class="mini sm-st" data-s="success">success</button>
+            <span class="demo-tag">illustrative state sketch · not a Rive embed</span>
+          </div>
+        </div>
+        <div class="src">For data-driven changes, runtime state and data binding can reduce some re-export cycles. New design or animation structure still updates the source asset.</div>
+      </div>
+      <div class="cell">
+        <h3>The agent layer</h3>
+        <div class="old">Generate → export code → manually hand off</div>
+        <div class="new">Prompt → source change → versioned, reviewable output</div>
+        <div class="demo">
+          <div class="demo-ctl" style="margin-bottom:8px">
+            <input type="text" id="agentIn" value="badge: shipped" maxlength="22" style="flex:1;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-family:var(--mono);font-size:12px;color:var(--ink)">
+            <button class="mini" id="agentBtn">render →</button>
+          </div>
+          <div class="demo-screen agent-out" id="agentOut"></div>
+          <span class="demo-tag" id="agentTag">illustrative sketch · text in, rendered output in place</span>
+        </div>
+        <div class="src">When the artifact is code, an agent can edit the source and run the pipeline. The shift isn't autonomous deploy; it's that creation, revision, and rendering work on the same source.</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="close"><b>In file-based creative workflows, sharing your work usually meant freezing it.</b> You exported a file so it could travel, and it went rigid the moment it left the tool. Web runtimes and source-driven deployment changed that: some work can now travel as a live system instead of a frozen deliverable. Export isn't gone, broadcast, film, regulated docs, and approved records still need an immutable version. <b>So the new problem isn't how to export the work. It's deciding which outputs stay live, and which must be locked as an approved record.</b></p>
+
+  <div class="cta">
+    <button class="act" id="ctaBtn">Copy the live URL →</button>
+  </div>
+
+  <footer>One self-contained HTML file · vanilla JS, no libraries · the medium became fluid · <a href="https://w230.net" target="_blank" rel="noopener noreferrer">Simone Leonelli</a>, May 2026</footer>
+</div>
+
+<script>
+const palettes=[
+  ['#56ccf2','#2f80ed','#ffffff'],  // sky: cyan and electric blue
+  ['#ff9a76','#ffd166','#fff5eb'],  // sunset: coral and warm gold
+  ['#9b7bff','#f472b6','#fce7f3'],  // bloom: violet and rose
+  ['#34d399','#14b8a6','#ecfdf5']   // jade: mint and teal
+];
+let state={txt:'Deploy, don\'t export',energy:62,pal:0,mode:'orbit'};
+
+// Read shared state from the URL hash, so a copied link carries the sender's edits.
+(function loadFromHash(){
+  try{
+    const h=new URLSearchParams(location.hash.slice(1));
+    if(h.has('t')) state.txt=(h.get('t')||' ').slice(0,28);
+    if(h.has('e')) state.energy=Math.max(0,Math.min(100,parseInt(h.get('e'))||0));
+    if(h.has('p')) state.pal=Math.max(0,Math.min(3,parseInt(h.get('p'))||0));
+    if(h.has('m')&&['orbit','wave','burst'].includes(h.get('m'))) state.mode=h.get('m');
+  }catch(e){}
+})();
+function shareURL(){
+  const h=new URLSearchParams({t:state.txt,e:state.energy,p:state.pal,m:state.mode});
+  return location.origin+location.pathname+'#'+h.toString();
+}
+
+const palEl=document.getElementById('pal');
+palettes.forEach((p,i)=>{
+  const d=document.createElement('div');
+  d.className='sw'+(i===state.pal?' on':'');
+  d.style.background=`linear-gradient(135deg,${p[0]} 0 50%,${p[1]} 50% 100%)`;
+  d.onclick=()=>{state.pal=i;[...palEl.children].forEach(c=>c.classList.remove('on'));d.classList.add('on')};
+  palEl.appendChild(d);
+});
+document.getElementById('txt').oninput=e=>state.txt=e.target.value||' ';
+document.getElementById('energy').oninput=e=>state.energy=+e.target.value;
+document.querySelectorAll('#mode .seg').forEach(s=>{
+  s.onclick=()=>{state.mode=s.dataset.m;document.querySelectorAll('#mode .seg').forEach(x=>x.classList.remove('on'));s.classList.add('on')};
+});
+// reflect any state loaded from the URL hash into the controls
+document.getElementById('txt').value=state.txt;
+document.getElementById('energy').value=state.energy;
+document.querySelectorAll('#mode .seg').forEach(s=>s.classList.toggle('on',s.dataset.m===state.mode));
+
+function draw(ctx,w,h,t,st){
+  const pal=palettes[st.pal];
+  const e=st.energy/100;
+  const g=ctx.createLinearGradient(0,0,w,h);
+  g.addColorStop(0,'#0d2748');g.addColorStop(1,'#123a6b');
+  ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+  const n=Math.round(18+e*60);
+  const cx=w/2,cy=h/2;
+  for(let i=0;i<n;i++){
+    const f=i/n;
+    let x,y,r;
+    if(st.mode==='orbit'){
+      const ang=t*(.5+e*1.6)+f*Math.PI*2;
+      const rad=(60+f*Math.min(w,h)*.42)*(1+.12*Math.sin(t*2+f*8));
+      x=cx+Math.cos(ang)*rad;y=cy+Math.sin(ang)*rad*.62;r=4+f*10*(1-e*.3);
+    }else if(st.mode==='wave'){
+      x=f*w;
+      y=cy+Math.sin(t*(1+e*3)+f*Math.PI*6)*h*.30*(.4+e);
+      r=3+8*Math.abs(Math.sin(f*Math.PI));
+    }else{
+      const ang=f*Math.PI*2*5;
+      const burst=(.5+.5*Math.sin(t*(1+e*4)))*(1+e*2);
+      const rad=f*Math.min(w,h)*.5*burst;
+      x=cx+Math.cos(ang)*rad;y=cy+Math.sin(ang)*rad;r=2+f*9;
+    }
+    ctx.beginPath();ctx.arc(x,y,r,0,7);
+    ctx.fillStyle=pal[i%2];ctx.globalAlpha=.5+.45*f;ctx.fill();
+  }
+  ctx.globalAlpha=1;
+  const fs=Math.min(w*.072,72);
+  ctx.font=`600 ${fs}px -apple-system,Segoe UI,Inter,sans-serif`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  const jitter=Math.sin(t*3)*e*4;
+  const tw=ctx.measureText(st.txt).width;
+  ctx.fillStyle='rgba(8,28,56,.5)';
+  ctx.fillRect(cx-tw/2-30,cy-fs*.7,tw+60,fs*1.4);
+  ctx.fillStyle=pal[2];
+  ctx.fillText(st.txt,cx,cy+jitter);
+  ctx.font='500 16px SFMono-Regular,Menlo,monospace';
+  ctx.fillStyle='rgba(255,255,255,.45)';ctx.textAlign='left';
+  ctx.fillText('rendered in-browser · frame computed from state',40,h-40);
+}
+
+const stage=document.getElementById('stage');
+const sctx=stage.getContext('2d');
+let start=performance.now();
+function loop(now){
+  const t=(now-start)/1000;
+  draw(sctx,stage.width,stage.height,t,state);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+document.getElementById('renderBtn').onclick=()=>{
+  const framesEl=document.getElementById('frames');
+  framesEl.innerHTML='';
+  const t0=performance.now();
+  const N=16, dur=2.0;
+  for(let i=0;i<N;i++){
+    const wrap=document.createElement('div');wrap.className='frame';
+    const c=document.createElement('canvas');c.width=320;c.height=180;
+    const cx=c.getContext('2d');
+    draw(cx,c.width,c.height,(i/N)*dur,state);
+    const lbl=document.createElement('span');lbl.textContent='f'+(i+1);
+    wrap.appendChild(c);wrap.appendChild(lbl);framesEl.appendChild(wrap);
+  }
+  const ms=Math.round(performance.now()-t0);
+  document.getElementById('rendertime').innerHTML='computed in <b>'+ms+'ms, all in your browser</b>';
+  const note=document.getElementById('frameNote');
+  note.style.display='block';
+  note.textContent='↑ 16 frames, computed just now from the current inputs (same inputs give the same frames). In HyperFrames a pattern like this becomes an MP4 through a headless Chrome + FFmpeg render. The source is the HTML; the frames are a render of it.';
+};
+function copyURL(btn){
+  const url=shareURL();
+  const o=btn.textContent;
+  const ok=()=>{btn.textContent='✓ copied a link with your edits';setTimeout(()=>btn.textContent=o,2200);};
+  const fail=()=>{btn.textContent='copy failed, here is the link: '+url;setTimeout(()=>btn.textContent=o,4000);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(ok).catch(fail);
+  }else{ fail(); }
+}
+document.getElementById('copyBtn').onclick=function(){copyURL(this)};
+document.getElementById('ctaBtn').onclick=function(){copyURL(this)};
+
+/* ---- card demo 1: presentations, the slide is a URL ---- */
+const slides=[
+  {n:'Deploy, don\'t export',d:'slide 1 · title'},
+  {n:'No .pptx attachment',d:'slide 2 · the deck is live'},
+  {n:'Edit → push → done',d:'slide 3 · every commit redeploys'}
+];
+let si=0;
+function renderSlide(){
+  const s=slides[si];
+  document.getElementById('slideUrl').innerHTML='…/deck<b>#'+(si+1)+'</b>';
+  document.getElementById('slideBody').innerHTML='<div class="sn">'+s.n+'</div><div class="sd">'+s.d+'</div>';
+}
+document.getElementById('slideNext').onclick=()=>{si=(si+1)%slides.length;renderSlide()};
+document.getElementById('slidePrev').onclick=()=>{si=(si-1+slides.length)%slides.length;renderSlide()};
+renderSlide();
+
+/* ---- card demo 2: video, repeatable frame scrubber ---- */
+const vc=document.getElementById('vidCanvas'),vx=vc.getContext('2d');
+function drawVid(p){
+  const w=vc.width,h=vc.height;
+  const g=vx.createLinearGradient(0,0,w,h);g.addColorStop(0,'#0d2748');g.addColorStop(1,'#123a6b');
+  vx.fillStyle=g;vx.fillRect(0,0,w,h);
+  const t=p*Math.PI*2;
+  for(let i=0;i<28;i++){
+    const f=i/28;
+    const x=f*w;const y=h/2+Math.sin(t+f*Math.PI*5)*h*.32;
+    vx.beginPath();vx.arc(x,y,3+5*Math.abs(Math.sin(f*Math.PI)),0,7);
+    vx.fillStyle=i%2?'#5dcaef':'#7cc0f5';vx.fill();
+  }
+  vx.fillStyle='#fff';vx.font='600 26px -apple-system,Segoe UI,sans-serif';
+  vx.textAlign='center';vx.textBaseline='middle';
+  vx.fillText('frame '+Math.round(p*30),w/2,h/2);
+}
+const vidScrub=document.getElementById('vidScrub');
+vidScrub.oninput=()=>{
+  const p=vidScrub.value/100;drawVid(p);
+  document.getElementById('vidTag').textContent='frame '+Math.round(p*30)+' · computed from source';
+};
+drawVid(.3);
+
+/* ---- card demo 3: animation, live state machine ---- */
+const sc=document.getElementById('smCanvas'),sx=sc.getContext('2d');
+let smState='idle',smT=0;
+const smColors={idle:'#7cc0f5',hover:'#5dcaef',success:'#5dcaa5'};
+const smLabel={idle:'idle',hover:'hover',success:'success ✓'};
+function drawSM(){
+  const w=sc.width,h=sc.height;
+  const g=sx.createLinearGradient(0,0,w,h);g.addColorStop(0,'#0d2748');g.addColorStop(1,'#123a6b');
+  sx.fillStyle=g;sx.fillRect(0,0,w,h);
+  const cx=w/2,cy=h/2;
+  const pulse=smState==='hover'?(1+.12*Math.sin(smT*6)):smState==='success'?1.15:1;
+  const rad=42*pulse;
+  sx.beginPath();sx.arc(cx,cy,rad,0,7);sx.fillStyle=smColors[smState];
+  sx.globalAlpha=smState==='idle'?.85:1;sx.fill();sx.globalAlpha=1;
+  if(smState==='success'){
+    sx.strokeStyle='#fff';sx.lineWidth=5;sx.lineCap='round';
+    sx.beginPath();sx.moveTo(cx-16,cy);sx.lineTo(cx-4,cy+12);sx.lineTo(cx+18,cy-14);sx.stroke();
+  }
+  sx.fillStyle='#fff';sx.font='600 16px SFMono-Regular,Menlo,monospace';
+  sx.textAlign='center';sx.textBaseline='middle';
+  sx.fillText('state: '+smLabel[smState],cx,h-26);
+}
+function smLoop(){smT+=.03;drawSM();requestAnimationFrame(smLoop)}
+smLoop();
+document.querySelectorAll('.sm-st').forEach(b=>{
+  b.onclick=()=>{smState=b.dataset.s;document.querySelectorAll('.sm-st').forEach(x=>x.classList.remove('on'));b.classList.add('on')};
+});
+
+/* ---- card demo 4: agent layer, text in to rendered output ---- */
+const agentOut=document.getElementById('agentOut');
+function deployAgent(){
+  const raw=document.getElementById('agentIn').value.trim()||'badge: live';
+  const parts=raw.split(':');
+  const kind=parts[0].trim().toLowerCase();
+  const val=(parts[1]||parts[0]).trim();
+  agentOut.innerHTML='';
+  if(kind==='badge'){
+    agentOut.style.background='linear-gradient(135deg,#0d2748,#123a6b)';
+    const pill=document.createElement('div');
+    pill.style.cssText='background:#5dcaa5;color:#04342c;font-weight:600;font-family:var(--mono);font-size:14px;padding:9px 18px;border-radius:20px';
+    pill.textContent='● '+val;
+    agentOut.appendChild(pill);
+  }else{
+    agentOut.style.background='linear-gradient(135deg,#0d2748,#123a6b)';
+    const tx=document.createElement('div');
+    tx.style.cssText='color:#fff;font-weight:600;font-size:18px;text-align:center';
+    tx.textContent=val;
+    agentOut.appendChild(tx);
+  }
+  const tag=document.getElementById('agentTag');
+  tag.textContent='✓ rendered in place from the text you typed';
+  setTimeout(()=>{tag.textContent='illustrative sketch · text in, rendered output in place'},1800);
+}
+document.getElementById('agentBtn').onclick=deployAgent;
+document.getElementById('agentIn').addEventListener('keydown',e=>{if(e.key==='Enter')deployAgent()});
+deployAgent();
+</script>
+</body>
+</html>
